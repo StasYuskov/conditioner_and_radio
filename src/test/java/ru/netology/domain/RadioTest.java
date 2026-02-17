@@ -1,6 +1,8 @@
 package ru.netology.domain;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,23 +22,27 @@ class RadioTest {
         assertEquals(1, radio.getCurrentVolume());
 
         // Увеличение громкости до максимума.
-        radio.moreVolume();radio.moreVolume();radio.moreVolume();radio.moreVolume();
-        radio.moreVolume();radio.moreVolume();radio.moreVolume();radio.moreVolume();
-        radio.moreVolume();
-        assertEquals(10, radio.getCurrentVolume());
+        radio.setVolume(98);
+        radio.moreVolume();radio.moreVolume();
+        assertEquals(100, radio.getCurrentVolume());
 
         // Попытка увеличения громкости выше максимума.
         radio.moreVolume();
-        assertEquals(10, radio.getCurrentVolume());
+        assertEquals(100, radio.getCurrentVolume());
 
         // Уменьшение громкости из максимума.
         radio.lessVolume();
-        assertEquals(9, radio.getCurrentVolume());
+        assertEquals(99, radio.getCurrentVolume());
     }
 
-    @Test
-    void radiostationButtonsTest() {
-        Radio radio = new Radio();
+    @ParameterizedTest
+    @CsvSource(value =
+            {"10",
+            "25"},
+            delimiter = ','
+    )
+    void radiostationButtonsTest(int countRadiostation) {
+        Radio radio = new Radio(countRadiostation);
 
         // Переключение радиостанции на следующую из начала.
         assertEquals(0, radio.getCurrentRadiostation());
@@ -45,11 +51,11 @@ class RadioTest {
 
         // Переклюючение радиостании на предыдущую (Выход за пределы диапазона станций).
         radio.prev();radio.prev();
-        assertEquals(9, radio.getCurrentRadiostation());
+        assertEquals(radio.getLastStation(), radio.getCurrentRadiostation());
 
         // Переклюючение радиостании на предыдущую из конца.
         radio.prev();
-        assertEquals(8, radio.getCurrentRadiostation());
+        assertEquals((radio.getLastStation() - 1), radio.getCurrentRadiostation());
 
         // Переклюючение радиостании на следующую (Выход за пределы диапазона станций).
         radio.next();radio.next();
@@ -57,21 +63,26 @@ class RadioTest {
 
     }
 
-    @Test
-    void setRadiostation() {
-        Radio radio = new Radio();
+    @ParameterizedTest
+    @CsvSource(value =
+            {"10",
+                    "25"},
+            delimiter = ','
+    )
+    void setRadiostation(int countRadiostation) {
+        Radio radio = new Radio(countRadiostation);
 
         // Тестирование установки радиостанции через анализ граничных значений и эквиваленитное разбиение.
         assertEquals(0, radio.getCurrentRadiostation());
-        radio.setRadiostation(5);
-        assertEquals(5, radio.getCurrentRadiostation());
+        radio.setRadiostation(countRadiostation/2);
+        assertEquals(countRadiostation/2, radio.getCurrentRadiostation());
         radio.setRadiostation(-1);
-        assertEquals(5, radio.getCurrentRadiostation());
-        radio.setRadiostation(10);
-        assertEquals(5, radio.getCurrentRadiostation());
+        assertEquals(countRadiostation/2, radio.getCurrentRadiostation());
+        radio.setRadiostation(countRadiostation+1);
+        assertEquals(countRadiostation/2, radio.getCurrentRadiostation());
         radio.setRadiostation(0);
         assertEquals(0, radio.getCurrentRadiostation());
-        radio.setRadiostation(9);
-        assertEquals(9, radio.getCurrentRadiostation());
+        radio.setRadiostation(radio.getLastStation());
+        assertEquals(radio.getLastStation(), radio.getCurrentRadiostation());
     }
 }
